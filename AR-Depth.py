@@ -133,7 +133,10 @@ class Reconstruction:
         view_pos = view.Position()
         depth_map = np.zeros((camera.height, camera.width), dtype=np.float32)
         for point_id, coord in view.points2d.items():
-            pos3d = self.points3d[point_id].position3d
+            try:
+                pos3d = self.points3d[point_id].position3d
+            except KeyError:
+                print(point_id, " is not in points3d")
             depth = np.linalg.norm(pos3d - view_pos)
             depth_map[int(coord[1]), int(coord[0])] = depth
         return depth_map
@@ -583,6 +586,7 @@ for frame in tqdm(recon.ViewIds(), leave=True, ascii=True, desc="by frames"):
         # print("==> Skipping frame " + recon.views[frame].name +               ", No prior keyframes.")
         continue
     print("==> Processing frame " + recon.views[frame].name)
+
     base_img = recon.GetImage(frame)
     flows = []
     for ref in reference_frames:
